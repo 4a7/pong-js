@@ -14,15 +14,16 @@ var yInicial=y;
 
 //true si se puede usar el muose como controlador
 var mouse=false;
-
+var multiL=true; 		//paleta L manual
+var multiR=true;		//paleta R manual
 //apariencia
 var gane_mensaje="Ganador";
 var perdida_mensaje="Perdedor";
 var final_mensaje="";
 var colors=['Red','Green','Blue','RoyalBlue','Navy','Chartreuse','DarkSlateBlue','DarkOrange','Black','Tomato','Purple','Teal','SeaGreen','Salmon','Peru'];
 var ballRadius = 10;
-var dx = 4.4;
-var dy = -3.6;
+var dx = 5;
+var dy = -4;
 var dxInicial=dx;
 var dyInicial=dy;
 var color=colors[getRandom(colors.length)];
@@ -40,14 +41,21 @@ var upRPressed = false;
 var downRPressed = false;
 var upLPressed = false;
 var downLPressed = false;
+var deltaPaleta=7;	//velocidad de la paleta
+var nivel=1;
+var deltaPaletaFacil=5;
+var deltaPaletaMedio=10;
+var deltaPaletaDificil=15;
+var deltaPaletaAutomatico=deltaPaletaFacil;
+var deltaDeltaPaletaAutomatico=5;	//cuanto cambia la velocidad de la paleta en modo automatico al cambiar el nivel
 //control
 var finalizar=false;
 document.addEventListener("mousemove", mouseMoveHandler, false);
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 //score
-var livesL=3;
-var livesR=3;
+var livesL=0;
+var livesR=0;
 var pongs=0;
 var lastPong=0;
 /*
@@ -100,11 +108,57 @@ function keyDownHandler(e) {
 	else if (e.keyCode == 83){
 		downLPressed = true;
 	}
-	else if(e.keyCode == 77){
+	else if(e.keyCode == 77){	//m
 		mouse=true;
 	}
-	else if(e.keyCode == 78){
+	else if(e.keyCode == 78){	//n
 		mouse=false;
+	}
+	else if (e.keyCode == 66){	//b
+		multiR=true;
+	}
+	else if (e.keyCode == 86){	//v
+		multiR=false;
+	}
+	else if (e.keyCode == 67){	//c
+		multiL=true;
+	}
+	else if (e.keyCode == 88){	//x
+		multiL=false;
+	}
+	else if (e.keyCode == 76){	//l, aumentar el nivel de la computadora
+		deltaPaletaAutomatico+=deltaDeltaPaletaAutomatico;
+		/*
+		if(nivel==1){
+			nivel++;
+			deltaPaletaAutomatico=deltaPaletaMedio;
+		}
+		else if (nivel==2){
+			nivel++;
+			deltaPaletaAutomatico=deltaPaletaMedio;
+		}
+		else if (nivel==3){
+			deltaPaletaAutomatico=deltaPaletaDificil;
+		}
+		*/
+	}
+	else if (e.keyCode == 75){	//k, disminuir el nivel de la computadora
+		if(deltaPaletaAutomatico-deltaDeltaPaletaAutomatico>0){
+			deltaPaletaAutomatico-=deltaDeltaPaletaAutomatico
+		}
+		/*
+		if(nivel==3){
+			nivel--;
+			deltaPaletaAutomatico=deltaPaletaMedio;
+		}
+		else if (nivel==2){
+			nivel--;
+			deltaPaletaAutomatico=deltaPaletaFacil;
+		}
+		else if (nivel==1){
+			deltaPaletaAutomatico=deltaPaletaFacil;
+		}
+		*/
 	}
 }
 function keyUpHandler(e) {
@@ -144,7 +198,7 @@ function bounce(){
 		hit=true;
 	}
 	*/
-	if(y+dy>canvas.height-ballRadius || y+dy<ballRadius){
+	if(y+dy>canvas.height-ballRadius/2 || y+dy<ballRadius){
 		dy=-dy;
 		hit=true;
 	}
@@ -152,15 +206,19 @@ function bounce(){
 	if(x + dx > canvas.width-2*paddleWidth-(ballRadius/2)){
 		if(y>paddleRY && y<(paddleRY+paddleHeight)){
 			//dx=-dx;
-			hasHit(false);
+			hasHit();
 			hit=true;
 		}
 		else{
 			//R pierde una vida
-			livesR--;
-			controlLives();
-			restart();
-			//drawResult("Punto para izquierda");
+			if(x+dx>=canvas.width+ballRadius){
+				livesL++;
+				//controlLives();
+				restart();
+				//drawResult("Punto para izquierda");
+			}
+			
+			
 			//sleepFor(1000);
 		}
 	}
@@ -168,16 +226,16 @@ function bounce(){
 	if( x+dx < 3*paddleWidth-(ballRadius/2)){
 		if(y>paddleLY && y<(paddleLY+paddleHeight)){
 			//dx=-dx;
-			hasHit(true);
+			hasHit();
 			hit=true;
 		}
 		else{
-			livesL--;
-			controlLives();
-			restart();
-			//L pierde una vida
-			//drawResult("Punto para derecha");
-			//sleepFor(1000);
+			if(x<=-ballRadius){
+				livesR++;
+				//controlLives();
+				restart();
+				//drawResult("Punto para izquierda");
+			}
 		}
 	}
 	if(hit){
@@ -192,29 +250,56 @@ function drawLineaMedio(){
 	ctx.closePath();
 }
 function drawPaddle(){
-	if(upRPressed && paddleRY > 0) {
-		paddleRY -= 7;
+	//R
+	//paleta R manual
+	if(multiR){
+		if(upRPressed && paddleRY > 0) {
+			paddleRY -= deltaPaleta;
+		}
+		if(downRPressed && paddleRY < canvas.height-paddleHeight) {
+			paddleRY += deltaPaleta;
+		}
 	}
-	if(downRPressed && paddleRY < canvas.height-paddleHeight) {
-		paddleRY += 7;
+	else{		//paleta R automatico
+		if(y>paddleRY){
+			paddleRY+=deltaPaletaAutomatico;
+		}
+		else if (y<paddleRY){
+			paddleRY-=deltaPaletaAutomatico;
+		}
 	}
+	
 	ctx.beginPath();
 	ctx.rect(paddleRX, paddleRY, paddleWidth, paddleHeight);
 	ctx.fillStyle = colorR;
 	ctx.fill();
 	ctx.closePath();
-	if(upLPressed && paddleLY > 0) {
-		paddleLY -= 7;
+	//L
+	//paleta L manual
+	if(multiL){
+		if(upLPressed && paddleLY > 0) {
+			paddleLY -= deltaPaleta;
+		}
+		if(downLPressed && paddleLY < canvas.height-paddleHeight) {
+			paddleLY += deltaPaleta;
+		}
 	}
-	if(downLPressed && paddleLY < canvas.height-paddleHeight) {
-		paddleLY += 7;
+	else{	//paleta L automatico
+		if(y>paddleLY){
+			paddleLY+=deltaPaletaAutomatico;
+		}
+		else if (y<paddleLY){
+			paddleLY-=deltaPaletaAutomatico;
+		}
 	}
+	
 	ctx.beginPath();
 	ctx.rect(paddleLX, paddleLY, paddleWidth, paddleHeight);
 	ctx.fillStyle = colorL;
 	ctx.fill();
 	ctx.closePath();
 }
+/*
 function controlLives(){
 	if(livesL==0){
 		drawResult("Derecha ha ganado");
@@ -225,7 +310,7 @@ function controlLives(){
 		finalizar=true;
 	}
 }
-/*
+
 function collisionDetection() {
 	for(c=0; c<brickColumnCount; c++) {
 		for(r=0; r<brickRowCount; r++) {
@@ -253,28 +338,31 @@ function drawScore(){
 	ctx.fillText("Score: "+score, 8, 20);
 }
 */
-function hasHit(left){
+function hasHit(){
+	var deltaSpeed=0.4;
 	dx=-dx;
+	var numX=getRandom(3);
+	var numY=getRandom(3);
+	var numX=numX/10;
+	var numY=numY/10;
 	if(dx<0){
-		dx-=0.5;
+		
+		dx-=deltaSpeed;
+		dx-=numX;
 	}
 	else{
-		dx+=0.5;
+		dx+=deltaSpeed;
+		dx+=numX;
 	}
 	if(dy<0){
-		dy-=0.5;
+		dy-=deltaSpeed;
+		dy-=numY;
 	}
 	else{
-		dy+=0.5;
+		dy+=deltaSpeed;
+		dy+=numY;
 	}
-	/*
-	if(left){
-		dy=(1/(y-paddleLY)/paddleHeight)*dy;
-	}
-	else{
-		dy=(1/(y-paddleRY)/paddleHeight)*dy;
-	}
-	*/
+	
 	
 }
 function restart(){
@@ -295,13 +383,13 @@ function drawResult(mensaje){
 }
 function drawLives() {
 	//R
-	ctx.font = "16px Arial";
-	ctx.fillStyle = colorR;
-	ctx.fillText("Lives: "+livesR, canvas.width-65, 20);
-	//L
-	ctx.font = "16px Arial";
+	ctx.font = "26px Arial";
 	ctx.fillStyle = colorL;
-	ctx.fillText("Lives: "+livesL, 8, 20);
+	ctx.fillText(livesL, (canvas.width/2)-52, 26);
+	//L
+	ctx.font = "26px Arial";
+	ctx.fillStyle = colorR;
+	ctx.fillText(livesR, canvas.width/2+39, 26);
 }
 function draw(){
 	if(finalizar){
