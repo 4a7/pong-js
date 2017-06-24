@@ -11,7 +11,6 @@ var x = canvas.width/2;
 var y = canvas.height/2;
 var xInicial=x;
 var yInicial=y;
-
 //true si se puede usar el muose como controlador
 var mouse=false;
 var multiL=true; 		//paleta L manual
@@ -58,36 +57,6 @@ var livesL=0;
 var livesR=0;
 var pongs=0;
 var lastPong=0;
-/*
-function establecerValores(){
-	x = canvas.width/2;
-	y = canvas.height-30;
-	ballRadius = 10;
-	dx = 2;
-	dy = -2;
-	paddleHeight=10;
-	paddleWidth=75;
-	paddleX=(canvas.width-paddleWidth)/2;
-	rightPressed = false;
-	leftPressed = false;
-	finalizar=false;
-	score=0;
-	lives=3;
-	brickRowCount = 3;
-	brickColumnCount = 5;
-	brickWidth = 75;
-	brickHeight = 20;
-	brickPadding = 10;
-	brickOffsetTop = 30;
-	brickOffsetLeft = 30;
-	for(c=0; c<brickColumnCount; c++) {
-		for(r=0; r<brickRowCount; r++) {
-			bricks[c][r] = { x: 0, y: 0,status:1 };
-		}
-	}
-	
-}
-*/
 function mouseMoveHandler(e){
 	canvas.off
 	var relativeY = e.clientY - canvas.offsetTop;
@@ -215,11 +184,7 @@ function bounce(){
 				livesL++;
 				//controlLives();
 				restart();
-				//drawResult("Punto para izquierda");
 			}
-			
-			
-			//sleepFor(1000);
 		}
 	}
 	//L
@@ -268,7 +233,6 @@ function drawPaddle(){
 			paddleRY-=deltaPaletaAutomatico;
 		}
 	}
-	
 	ctx.beginPath();
 	ctx.rect(paddleRX, paddleRY, paddleWidth, paddleHeight);
 	ctx.fillStyle = colorR;
@@ -292,52 +256,12 @@ function drawPaddle(){
 			paddleLY-=deltaPaletaAutomatico;
 		}
 	}
-	
 	ctx.beginPath();
 	ctx.rect(paddleLX, paddleLY, paddleWidth, paddleHeight);
 	ctx.fillStyle = colorL;
 	ctx.fill();
 	ctx.closePath();
 }
-/*
-function controlLives(){
-	if(livesL==0){
-		drawResult("Derecha ha ganado");
-		finalizar=true;
-	}
-	if(livesR==0){
-		drawResult("Izquierda ha ganado");
-		finalizar=true;
-	}
-}
-
-function collisionDetection() {
-	for(c=0; c<brickColumnCount; c++) {
-		for(r=0; r<brickRowCount; r++) {
-			var b = bricks[c][r];
-			if(b.status==1){
-					if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
-					dy = -dy;
-					b.status=0;
-					color=colors[getRandom(colors.length)];
-					score++;
-					if(score==(brickColumnCount*brickRowCount)){
-						final_mensaje=gane_mensaje;
-						finalizar=true;
-						//alert("EOG");
-						//document.location.reload();
-					}
-				}
-			}
-		}
-	}
-}
-function drawScore(){
-	ctx.font = "16px Arial";
-	ctx.fillStyle = "#0095DD";
-	ctx.fillText("Score: "+score, 8, 20);
-}
-*/
 function hasHit(){
 	var deltaSpeed=0.4;
 	dx=-dx;
@@ -362,8 +286,6 @@ function hasHit(){
 		dy+=deltaSpeed;
 		dy+=numY;
 	}
-	
-	
 }
 function restart(){
 	if(dxInicial<0&&dx<0){
